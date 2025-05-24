@@ -7,7 +7,7 @@ export async function prepareMcpConfig(
   branch: string,
 ): Promise<string> {
   try {
-    const mcpConfig = {
+    const defaultMcpConfig = {
       mcpServers: {
         github: {
           command: "docker",
@@ -40,7 +40,29 @@ export async function prepareMcpConfig(
       },
     };
 
-    return JSON.stringify(mcpConfig, null, 2);
+    // Parse and merge user-provided MCP configuration if available
+    const userMcpConfigStr = process.env.USER_MCP_CONFIG;
+    let finalMcpConfig = defaultMcpConfig;
+    
+    if (userMcpConfigStr && userMcpConfigStr.trim() !== "") {
+      try {
+        const userMcpConfig = JSON.parse(userMcpConfigStr);
+        
+        // Deep merge the configurations
+        finalMcpConfig = {
+          mcpServers: {
+            ...defaultMcpConfig.mcpServers,
+            ...(userMcpConfig.mcpServers || {}),
+          },
+        };
+        
+        console.log("Merged MCP configuration with user-provided config");
+      } catch (parseError) {
+        core.warning(`Failed to parse user MCP config: ${parseError}. Using default configuration.`);
+      }
+    }
+
+    return JSON.stringify(finalMcpConfig, null, 2);
   } catch (error) {
     core.setFailed(`Install MCP server failed with error: ${error}`);
     process.exit(1);
