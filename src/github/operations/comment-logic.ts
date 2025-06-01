@@ -4,6 +4,7 @@ export type ExecutionDetails = {
   cost_usd?: number;
   duration_ms?: number;
   duration_api_ms?: number;
+  num_turns?: number;
 };
 
 export type CommentUpdateInput = {
@@ -109,13 +110,32 @@ export function updateCommentBody(input: CommentUpdateInput): string {
     durationStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
   }
 
+  // Format cost if available
+  let costStr = "";
+  if (executionDetails?.cost_usd !== undefined) {
+    costStr = `$${executionDetails.cost_usd.toFixed(2)}`;
+  }
+
+  // Format turns if available
+  let turnsStr = "";
+  if (executionDetails?.num_turns !== undefined) {
+    turnsStr = `${executionDetails.num_turns} turns`;
+  }
+
   // Build the header
   let header = "";
 
   if (actionFailed) {
     header = "**Claude encountered an error";
-    if (durationStr) {
-      header += ` after ${durationStr}`;
+    
+    // Add execution metrics if available
+    const metrics = [];
+    if (durationStr) metrics.push(durationStr);
+    if (turnsStr) metrics.push(turnsStr);
+    if (costStr) metrics.push(costStr);
+    
+    if (metrics.length > 0) {
+      header += ` after ${metrics.join(" • ")}`;
     }
     header += "**";
   } else {
@@ -125,8 +145,15 @@ export function updateCommentBody(input: CommentUpdateInput): string {
       triggerUsername || (usernameMatch ? usernameMatch[1] : "user");
 
     header = `**Claude finished @${username}'s task`;
-    if (durationStr) {
-      header += ` in ${durationStr}`;
+    
+    // Add execution metrics if available
+    const metrics = [];
+    if (durationStr) metrics.push(durationStr);
+    if (turnsStr) metrics.push(turnsStr);
+    if (costStr) metrics.push(costStr);
+    
+    if (metrics.length > 0) {
+      header += ` in ${metrics.join(" • ")}`;
     }
     header += "**";
   }
