@@ -144,6 +144,7 @@ async function run() {
       cost_usd?: number;
       duration_ms?: number;
       duration_api_ms?: number;
+      num_turns?: number;
     } | null = null;
     let actionFailed = false;
     let errorDetails: string | undefined;
@@ -168,13 +169,14 @@ async function run() {
             const lastElement = outputData[outputData.length - 1];
             if (
               lastElement.type === "result" &&
-              "cost_usd" in lastElement &&
+              "total_cost_usd" in lastElement &&
               "duration_ms" in lastElement
             ) {
               executionDetails = {
-                cost_usd: lastElement.cost_usd,
+                cost_usd: lastElement.total_cost_usd,
                 duration_ms: lastElement.duration_ms,
                 duration_api_ms: lastElement.duration_api_ms,
+                num_turns: lastElement.num_turns,
               };
             }
           }

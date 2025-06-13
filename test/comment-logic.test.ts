@@ -27,6 +27,58 @@ describe("updateCommentBody", () => {
       expect(result).not.toContain("Claude Code is working");
     });
 
+    it("includes cost and turns in header when available", () => {
+      const input = {
+        ...baseInput,
+        currentBody: "Claude Code is working…",
+        executionDetails: {
+          duration_ms: 74000,
+          cost_usd: 15.16,
+          num_turns: 237,
+        },
+        triggerUsername: "trigger-user",
+      };
+
+      const result = updateCommentBody(input);
+      expect(result).toContain(
+        "**Claude finished @trigger-user's task in 1m 14s** (💵 $15.16, 🔄 237 turns)",
+      );
+    });
+
+    it("includes only cost when turns not available", () => {
+      const input = {
+        ...baseInput,
+        currentBody: "Claude Code is working…",
+        executionDetails: {
+          duration_ms: 74000,
+          cost_usd: 5.50,
+        },
+        triggerUsername: "trigger-user",
+      };
+
+      const result = updateCommentBody(input);
+      expect(result).toContain(
+        "**Claude finished @trigger-user's task in 1m 14s** (💵 $5.50)",
+      );
+    });
+
+    it("includes only turns when cost not available", () => {
+      const input = {
+        ...baseInput,
+        currentBody: "Claude Code is working…",
+        executionDetails: {
+          duration_ms: 74000,
+          num_turns: 42,
+        },
+        triggerUsername: "trigger-user",
+      };
+
+      const result = updateCommentBody(input);
+      expect(result).toContain(
+        "**Claude finished @trigger-user's task in 1m 14s** (🔄 42 turns)",
+      );
+    });
+
     it("includes error message header with duration", () => {
       const input = {
         ...baseInput,

@@ -4,6 +4,7 @@ export type ExecutionDetails = {
   cost_usd?: number;
   duration_ms?: number;
   duration_api_ms?: number;
+  num_turns?: number;
 };
 
 export type CommentUpdateInput = {
@@ -129,6 +130,18 @@ export function updateCommentBody(input: CommentUpdateInput): string {
       header += ` in ${durationStr}`;
     }
     header += "**";
+  }
+
+  // Add cost and turns information if available
+  const details = [];
+  if (executionDetails?.cost_usd !== undefined) {
+    details.push(`💵 $${executionDetails.cost_usd.toFixed(2)}`);
+  }
+  if (executionDetails?.num_turns !== undefined) {
+    details.push(`🔄 ${executionDetails.num_turns} turns`);
+  }
+  if (details.length > 0) {
+    header += ` (${details.join(', ')})`;
   }
 
   // Add links section
