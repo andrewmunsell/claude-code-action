@@ -126,7 +126,7 @@ runs:
     - name: Run Claude Code
       id: claude-code
       if: steps.prepare.outputs.contains_trigger == 'true'
-      uses: grll/claude-code-base-action@30f4e17267bd0172ae76f7a3a10593c44811b230 # Latest commit from fork
+      uses: andrewmunsell/claude-code-base-action@chore/do-not-require-refresh-token
       with:
         prompt_file: ${{ runner.temp }}/claude-prompts/claude-prompt.txt
         allowed_tools: ${{ env.ALLOWED_TOOLS }}
